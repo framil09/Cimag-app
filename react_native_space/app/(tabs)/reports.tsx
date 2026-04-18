@@ -63,9 +63,16 @@ export default function ReportsScreen() {
     setGenerating(true);
     setLastResult(null);
     try {
+      const parsedStart = new Date(startDate.trim() + 'T00:00:00');
+      const parsedEnd = new Date(endDate.trim() + 'T23:59:59');
+      if (isNaN(parsedStart.getTime()) || isNaN(parsedEnd.getTime())) {
+        Alert.alert('Atenção', 'Data inválida. Use o formato AAAA-MM-DD.');
+        setGenerating(false);
+        return;
+      }
       const res = await generateReport(
-        new Date(startDate.trim()).toISOString(),
-        new Date(endDate.trim()).toISOString(),
+        parsedStart.toISOString(),
+        parsedEnd.toISOString(),
         vehiclePlate?.trim() || undefined,
       );
       setLastResult({

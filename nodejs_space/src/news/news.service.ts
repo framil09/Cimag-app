@@ -17,6 +17,13 @@ export class NewsService {
   private cache: { data: NewsItem[]; timestamp: number } | null = null;
   private readonly CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
+  private toAbsoluteUrl(path: string | null): string | null {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    const clean = path.startsWith('/') ? path : `/${path}`;
+    return `https://cimag.org.br${clean}`;
+  }
+
   async getNews(): Promise<NewsItem[]> {
     if (this.cache && Date.now() - this.cache.timestamp < this.CACHE_TTL) {
       return this.cache.data;
@@ -33,13 +40,15 @@ export class NewsService {
   }
 
   private async scrapeNews(): Promise<NewsItem[]> {
-    const { data: html } = await axios.get('https://cimag.org.br/mostra-noticias', {
+    const { data } = await axios.get('https://cimag.org.br/mostra-noticias', {
       timeout: 10000,
+      responseType: 'arraybuffer',
       headers: {
         'User-Agent': 'CIMAG-App/1.0',
         Accept: 'text/html',
       },
     });
+    const html = Buffer.from(data).toString('latin1');
 
     const $ = cheerio.load(html);
     const newsItems: NewsItem[] = [];
@@ -58,12 +67,8 @@ export class NewsService {
           date: this.extractDate(card.text()) || '',
           title,
           summary: summary.replace(/Leia Mais\.\.\.$/i, '').trim(),
-          imageUrl: imageUrl && !imageUrl.startsWith('http')
-            ? `https://cimag.org.br${imageUrl}`
-            : imageUrl,
-          link: link && !link.startsWith('http')
-            ? `https://cimag.org.br${link}`
-            : link,
+          imageUrl: this.toAbsoluteUrl(imageUrl),
+          link: this.toAbsoluteUrl(link) || 'https://cimag.org.br',
         });
       }
     });
@@ -77,21 +82,26 @@ export class NewsService {
   }
 
   private async scrapeHomePage(): Promise<NewsItem[]> {
-    const { data: html } = await axios.get('https://cimag.org.br', {
+    const { data } = await axios.get('https://cimag.org.br', {
       timeout: 10000,
+      responseType: 'arraybuffer',
       headers: {
         'User-Agent': 'CIMAG-App/1.0',
         Accept: 'text/html',
       },
     });
+    const html = Buffer.from(data).toString('latin1');
 
     const $ = cheerio.load(html);
     const newsItems: NewsItem[] = [];
 
     // Destaque principal
+    const NON_NEWS = ['MUNICÍPIOS ASSOCIADOS', 'DESTAQUES', 'LINKS ÚTEIS', 'DOCUMENTAÇÃO', 'PORTAL', 'CONSÓRCIO', 'CONHEÇA'];
+    const isNonNews = (t: string) => NON_NEWS.some(kw => t.toUpperCase().includes(kw)) || t.length < 20;
+
     const destaqueTitle = $('h2').filter((_, el) => {
       const text = $(el).text().trim();
-      return text.length > 20 && !text.includes('CIMAG') && !text.includes('Destaques') && !text.includes('Notícias');
+      return text.length > 20 && !isNonNews(text);
     });
 
     destaqueTitle.each((i, el) => {
@@ -106,9 +116,7 @@ export class NewsService {
           date: this.extractDate(parent.text()) || '',
           title,
           summary: summary.substring(0, 300),
-          imageUrl: imageUrl && !imageUrl.startsWith('http')
-            ? `https://cimag.org.br${imageUrl}`
-            : imageUrl,
+          imageUrl: this.toAbsoluteUrl(imageUrl),
           link: 'https://cimag.org.br',
         });
       }
@@ -117,7 +125,8 @@ export class NewsService {
     // h4 news items
     $('h4').each((i, el) => {
       const title = $(el).text().trim();
-      if (title.length > 15 && !title.includes('Iluminação') && !title.includes('Portal')
+      if (title.length > 15 && !isNonNews(title)
+          && !title.includes('Iluminação') && !title.includes('Portal')
           && !title.includes('LINKS') && !title.includes('DOCUMENTAÇÃO')) {
         const parent = $(el).closest('.card, div');
         const summary = parent.find('p').first().text().trim();
@@ -129,12 +138,8 @@ export class NewsService {
           date: this.extractDate(parent.text()) || '',
           title,
           summary: summary.replace(/Leia Mais\.\.\.$/i, '').trim().substring(0, 300),
-          imageUrl: imageUrl && !imageUrl.startsWith('http')
-            ? `https://cimag.org.br${imageUrl}`
-            : imageUrl,
-          link: link && !link.startsWith('http')
-            ? `https://cimag.org.br${link}`
-            : link,
+          imageUrl: this.toAbsoluteUrl(imageUrl),
+          link: this.toAbsoluteUrl(link) || 'https://cimag.org.br',
         });
       }
     });

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, RefreshControl, Image,
+  View, Text, StyleSheet, ScrollView, Pressable, RefreshControl, Image, Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -74,7 +74,10 @@ export default function HomeScreen() {
             <Text style={styles.activeDetail}>{truncateAddress(activeTrip?.startAddress, 50)}</Text>
             <GradientButton
               title="Encerrar Viagem"
-              onPress={() => router.push({ pathname: '/trips/end', params: { tripId: activeTrip?.id } })}
+            onPress={() => {
+              if (Platform.OS === 'web') (document.activeElement as HTMLElement)?.blur?.();
+              router.push({ pathname: '/trips/end', params: { tripId: activeTrip?.id } });
+            }}
               style={styles.endBtn}
               icon={<Ionicons name="flag" size={18} color="#FFF" />}
             />
@@ -82,7 +85,10 @@ export default function HomeScreen() {
         ) : (
           <GradientButton
             title="Iniciar Nova Viagem"
-            onPress={() => router.push('/trips/start')}
+            onPress={() => {
+              if (Platform.OS === 'web') (document.activeElement as HTMLElement)?.blur?.();
+              router.push('/trips/start');
+            }}
             style={styles.startBtn}
             icon={<Ionicons name="car" size={20} color="#FFF" />}
           />
@@ -126,7 +132,10 @@ export default function HomeScreen() {
           <Pressable
             key={trip?.id}
             style={({ pressed }) => [styles.card, styles.tripCard, pressed && styles.pressed]}
-            onPress={() => router.push({ pathname: '/trips/[id]', params: { id: trip?.id } })}
+            onPress={() => {
+              if (Platform.OS === 'web') (document.activeElement as HTMLElement)?.blur?.();
+              router.push({ pathname: '/trips/[id]', params: { id: trip?.id } });
+            }}
           >
             <View style={styles.tripRow}>
               <Text style={styles.tripPlate}>{trip?.vehiclePlate ?? '-'}</Text>

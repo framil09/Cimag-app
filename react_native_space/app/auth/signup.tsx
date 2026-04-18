@@ -35,6 +35,7 @@ export default function SignupScreen() {
     setLoading(true);
     try {
       await signup(name.trim(), email.trim(), password);
+      router.replace('/(tabs)');
     } catch (e: any) {
       const msg = e?.response?.data?.message ?? 'Erro ao criar conta.';
       setError(typeof msg === 'string' ? msg : 'Erro ao criar conta.');
@@ -75,7 +76,7 @@ export default function SignupScreen() {
 
             <GradientButton title="Cadastrar" onPress={handleSignup} loading={loading} style={styles.button} />
 
-            <Pressable onPress={() => router.back()} style={styles.linkBtn}>
+            <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace('/auth/login')} style={styles.linkBtn}>
               <Text style={styles.linkText}>Já tem conta? <Text style={styles.linkBold}>Faça login</Text></Text>
             </Pressable>
           </View>

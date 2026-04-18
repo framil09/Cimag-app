@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, FlatList, Pressable, TextInput, RefreshControl,
+  View, Text, StyleSheet, FlatList, Pressable, TextInput, RefreshControl, Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -56,7 +56,10 @@ export default function HistoryScreen() {
   const renderItem = ({ item }: { item: Trip }) => (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-      onPress={() => router.push({ pathname: '/trips/[id]', params: { id: item?.id } })}
+      onPress={() => {
+        if (Platform.OS === 'web') (document.activeElement as HTMLElement)?.blur?.();
+        router.push({ pathname: '/trips/[id]', params: { id: item?.id } });
+      }}
     >
       <View style={styles.cardHeader}>
         <Text style={styles.plate}>{item?.vehiclePlate ?? '-'}</Text>

@@ -52,7 +52,7 @@ export default function EditTripScreen() {
 
       await updateTrip(id, data);
       Alert.alert('Sucesso', 'Viagem atualizada!', [
-        { text: 'OK', onPress: () => router.back() },
+        { text: 'OK', onPress: () => router.canGoBack() ? router.back() : router.replace('/(tabs)') },
       ]);
     } catch (e: any) {
       Alert.alert('Erro', e?.response?.data?.message ?? 'Erro ao atualizar viagem.');
@@ -74,7 +74,7 @@ export default function EditTripScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.headerRow}>
-            <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} style={styles.backBtn}>
               <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
             </Pressable>
             <Text style={styles.title}>Editar Viagem</Text>
@@ -113,7 +113,7 @@ export default function EditTripScreen() {
 
           <GradientButton title="Salvar Alterações" onPress={handleSave} loading={saving} style={styles.saveBtn} />
 
-          <Pressable onPress={() => router.back()} style={styles.cancelBtn}>
+          <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} style={styles.cancelBtn}>
             <Text style={styles.cancelText}>Cancelar</Text>
           </Pressable>
         </ScrollView>

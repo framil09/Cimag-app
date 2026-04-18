@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { LogBox } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
@@ -7,6 +8,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from '../src/contexts/AuthContext';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { colors } from '../src/theme';
+
+// Suppress react-native-web internal deprecation warnings
+LogBox.ignoreLogs([
+  'props.pointerEvents is deprecated',
+  'The action \'GO_BACK\' was not handled',
+]);
 
 SplashScreen.preventAutoHideAsync();
 
