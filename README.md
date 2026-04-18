@@ -129,4 +129,4 @@ Documentação Swagger disponível em: `http://localhost:3000/api-docs`
 
 ## Licença
 
-Projeto interno do CIMAG — Consórcio Intermunicipal do Sul de Minas.
+Projeto interno do CIMAG — Consórcio Intermunicipal Multifinalitário da Microrregião do Circuito das Águas.

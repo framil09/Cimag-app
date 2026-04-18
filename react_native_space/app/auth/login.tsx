@@ -30,6 +30,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email.trim(), password);
+      router.replace('/(tabs)');
     } catch (e: any) {
       const msg = e?.response?.data?.message ?? 'Erro ao fazer login. Verifique suas credenciais.';
       setError(typeof msg === 'string' ? msg : 'Erro ao fazer login.');
@@ -41,7 +42,7 @@ export default function LoginScreen() {
   const animateButtonPress = (pressed: boolean) => {
     Animated.spring(buttonScale, {
       toValue: pressed ? 0.96 : 1,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
       speed: 50,
       bounciness: 4,
     }).start();
@@ -245,10 +246,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    ...Platform.select({
+      web: { boxShadow: '0 4px 12px rgba(0,0,0,0.15)' },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+      },
+    }),
     elevation: 8,
   },
   logo: { width: 80, height: 80 },
@@ -274,10 +280,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 28,
-    shadowColor: '#0D9488',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
+    ...Platform.select({
+      web: { boxShadow: '0 4px 20px rgba(13,148,136,0.08)' },
+      default: {
+        shadowColor: '#0D9488',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 20,
+      },
+    }),
     elevation: 6,
   },
   welcomeText: {
@@ -332,10 +343,15 @@ const styles = StyleSheet.create({
   inputWrapperFocused: {
     borderColor: colors.primary,
     backgroundColor: '#FFFFFF',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
+    ...Platform.select({
+      web: { boxShadow: '0 0 8px rgba(13,148,136,0.12)' },
+      default: {
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+      },
+    }),
     elevation: 2,
   },
   inputIcon: {
