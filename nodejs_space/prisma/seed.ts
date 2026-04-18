@@ -9,10 +9,10 @@ async function main() {
 
   // Gestor (manager) - can view and generate reports
   await prisma.user.upsert({
-    where: { email: 'sec.executivo@cimag.org.com.br' },
+    where: { email: 'sec.executivo@cimag.org.br' },
     update: { role: 'gestor', password: gestorPassword },
     create: {
-      email: 'sec.executivo@cimag.org.com.br',
+      email: 'sec.executivo@cimag.org.br',
       password: gestorPassword,
       name: 'Secretario Executivo',
       role: 'gestor',
@@ -32,7 +32,7 @@ async function main() {
   });
 
   console.log('Seed completed successfully');
-  console.log('  Gestor: sec.executivo@cimag.org.com.br');
+  console.log('  Gestor: sec.executivo@cimag.org.br');
   console.log('  Motorista: motorista@cimag.com');
 }
 
