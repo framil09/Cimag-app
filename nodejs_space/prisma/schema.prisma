@@ -1,0 +1,88 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("motorista")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  trips     Trip[]
+  files     File[]
+  reports   Report[]
+}
+
+model File {
+  id                 String   @id @default(uuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName           String
+  cloud_storage_path String
+  isPublic           Boolean  @default(false)
+  contentType        String
+  createdAt          DateTime @default(now())
+  tripsAsStart       Trip[]   @relation("StartOdometerPhoto")
+  tripsAsEnd         Trip[]   @relation("EndOdometerPhoto")
+  reports            Report[]
+
+  @@index([userId])
+}
+
+model Trip {
+  id                    String    @id @default(uuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  driverName            String
+  vehiclePlate          String
+  purpose               String
+  status                String    @default("active")
+  startLat              Float
+  startLng              Float
+  startAddress          String
+  startOdometer         Float
+  startOdometerPhotoId  String?
+  startOdometerPhoto    File?     @relation("StartOdometerPhoto", fields: [startOdometerPhotoId], references: [id], onDelete: SetNull)
+  endLat                Float?
+  endLng                Float?
+  endAddress            String?
+  endOdometer           Float?
+  endOdometerPhotoId    String?
+  endOdometerPhoto      File?     @relation("EndOdometerPhoto", fields: [endOdometerPhotoId], references: [id], onDelete: SetNull)
+  distance              Float?
+  startedAt             DateTime
+  endedAt               DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([vehiclePlate])
+  @@index([startedAt])
+  @@index([userId, status])
+}
+
+model Report {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startDate    DateTime
+  endDate      DateTime
+  vehiclePlate String?
+  tripCount    Int
+  totalKm      Float
+  fileId       String
+  file         File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
