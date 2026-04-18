@@ -7,6 +7,7 @@ import { OcrModule } from './ocr/ocr.module';
 import { GeocodeModule } from './geocode/geocode.module';
 import { TripsModule } from './trips/trips.module';
 import { ReportsModule } from './reports/reports.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ReportsModule } from './reports/reports.module';
     GeocodeModule,
     TripsModule,
     ReportsModule,
+    NewsModule,
   ],
 })
 export class AppModule {}

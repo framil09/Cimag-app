@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, Linking,
+  View, Text, StyleSheet, ScrollView, Pressable, Linking, ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing, borderRadius, shadows } from '../../src/theme';
+import { getNews, NewsItem } from '../../src/services/news';
 
 const AREAS_ATUACAO = [
   { icon: 'bulb' as const, title: 'Iluminação Pública', description: 'Gestão e manutenção da iluminação pública dos municípios consorciados.' },
@@ -29,50 +30,58 @@ const MUNICIPIOS = [
   'Três Corações', 'Virgínia',
 ];
 
-const NEWS = [
+const FALLBACK_NEWS: NewsItem[] = [
   {
     id: '1',
     date: '31 Mar 2026',
     title: 'Assembleia Geral reforça compromisso com o desenvolvimento em Pouso Alto',
     summary:
-      'A Assembleia Geral da AMAG-CIMAG reuniu prefeitos e representantes dos municípios consorciados para debater pautas estratégicas voltadas ao desenvolvimento regional, avaliando serviços prestados e promovendo soluções integradas.',
-    icon: 'people' as const,
+      'A Assembleia Geral da AMAG-CIMAG reuniu prefeitos e representantes dos municípios consorciados para debater pautas estratégicas voltadas ao desenvolvimento regional.',
+    imageUrl: null,
+    link: 'https://cimag.org.br',
   },
   {
     id: '2',
     date: '25 Fev 2026',
     title: 'Prefeitos discutem saúde especializada no Ministério da Saúde',
     summary:
-      'Os prefeitos da AMAG-CIMAG participaram de reunião no Ministério da Saúde, em Brasília, para discutir o fortalecimento da saúde especializada nos municípios da microrregião do Circuito das Águas.',
-    icon: 'medkit' as const,
+      'Os prefeitos da AMAG-CIMAG participaram de reunião no Ministério da Saúde, em Brasília, para discutir o fortalecimento da saúde especializada na microrregião.',
+    imageUrl: null,
+    link: 'https://cimag.org.br',
   },
   {
     id: '3',
     date: '25 Fev 2026',
     title: 'Projeto de Mini Fazenda Solar apresentado ao Ministro de Minas e Energia',
     summary:
-      'Em Brasília, prefeitos da AMAG-CIMAG apresentaram ao Ministro Alexandre Silveira o projeto de Mini Fazenda Solar, visando fortalecer o desenvolvimento regional com energia sustentável.',
-    icon: 'sunny' as const,
+      'Prefeitos da AMAG-CIMAG apresentaram ao Ministro Alexandre Silveira o projeto de Mini Fazenda Solar para desenvolvimento regional sustentável.',
+    imageUrl: null,
+    link: 'https://cimag.org.br',
   },
   {
     id: '4',
-    date: '12 Fev 2026',
-    title: 'Reunião Extraordinária da AMAG-CIMAG em Caxambu',
-    summary:
-      'Reunião extraordinária realizada na sede da Associação, em Caxambu, com a presença dos prefeitos dos municípios consorciados para deliberar sobre pautas urgentes.',
-    icon: 'chatbubbles' as const,
-  },
-  {
-    id: '5',
     date: '16 Jan 2026',
     title: 'AMAG e CIMAG iniciam 2026 com Assembleia Geral em Itanhandu',
     summary:
-      'Realizada em Itanhandu a 263ª Assembleia Geral da AMAG e a 71ª Assembleia Geral do CIMAG, marcando oficialmente o início dos trabalhos do ano de 2026.',
-    icon: 'calendar' as const,
+      'Realizada em Itanhandu a 263ª Assembleia Geral da AMAG e a 71ª Assembleia Geral do CIMAG, marcando o início dos trabalhos de 2026.',
+    imageUrl: null,
+    link: 'https://cimag.org.br',
   },
 ];
 
 export default function CimagScreen() {
+  const [news, setNews] = useState<NewsItem[]>(FALLBACK_NEWS);
+  const [loadingNews, setLoadingNews] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    getNews()
+      .then((data) => { if (!cancelled && data.length > 0) setNews(data); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoadingNews(false); });
+    return () => { cancelled = true; };
+  }, []);
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -205,18 +214,24 @@ export default function CimagScreen() {
           <View style={styles.newsSectionHeader}>
             <Ionicons name="newspaper" size={22} color={colors.primary} />
             <Text style={styles.sectionTitle}>Notícias do Consórcio</Text>
+            {loadingNews && <ActivityIndicator size="small" color={colors.primary} />}
           </View>
-          {NEWS.map((item) => (
-            <View key={item.id} style={styles.newsCard}>
+          {news.map((item) => (
+            <Pressable
+              key={item.id}
+              style={styles.newsCard}
+              onPress={() => item.link && Linking.openURL(item.link)}
+            >
               <View style={styles.newsIconWrap}>
-                <Ionicons name={item.icon} size={24} color={colors.primary} />
+                <Ionicons name="document-text" size={24} color={colors.primary} />
               </View>
               <View style={styles.newsContent}>
-                <Text style={styles.newsDate}>{item.date}</Text>
+                {item.date ? <Text style={styles.newsDate}>{item.date}</Text> : null}
                 <Text style={styles.newsTitle}>{item.title}</Text>
-                <Text style={styles.newsSummary}>{item.summary}</Text>
+                <Text style={styles.newsSummary} numberOfLines={3}>{item.summary}</Text>
               </View>
-            </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} style={{ alignSelf: 'center' }} />
+            </Pressable>
           ))}
           <Pressable
             style={styles.linkButton}
