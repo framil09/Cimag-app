@@ -56,6 +56,9 @@ export const shadows = Platform.select({
   android: {
     elevation: 2,
   },
+  web: {
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+  },
   default: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

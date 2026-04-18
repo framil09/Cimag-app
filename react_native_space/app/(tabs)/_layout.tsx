@@ -70,7 +70,6 @@ export default function TabsLayout() {
         options={{
           title: 'CIMAG',
           tabBarIcon: ({ color, size }) => <Ionicons name="business" size={size} color={color} />,
-          href: isGestor ? null : undefined,
         }}
       />
       <Tabs.Screen
